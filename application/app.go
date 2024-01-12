@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/utilyre/golang-backend-template/routes"
 	"github.com/utilyre/xmate"
 )
 
@@ -55,13 +56,10 @@ func New() *Application {
 }
 
 func (app *Application) Init() {
-	app.router.Get("/",
-		app.handler.HandleFunc(func(w http.ResponseWriter, r *http.Request) error {
-			return xmate.WriteHTML(w, app.views.Lookup("home"), http.StatusOK, nil)
-		}),
-	)
-
-	// TODO: add routes
+	app.router.Mount("/", routes.Home{
+		Handler:  app.handler,
+		HomeView: app.views.Lookup("home"),
+	}.Router())
 
 	app.router.Handle("/*", http.FileServer(neuteredFileSystem{
 		fs: http.Dir("public"),
