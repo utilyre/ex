@@ -3,51 +3,40 @@ package application
 import (
 	"errors"
 	"html/template"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/utilyre/golang-backend-template/config"
 	"github.com/utilyre/golang-backend-template/routes"
 	"github.com/utilyre/xmate"
 )
 
 type Application struct {
+	cfg     config.Config
 	logger  *slog.Logger
 	router  chi.Router
 	handler xmate.ErrorHandler
 	views   *template.Template
 }
 
-func New() *Application {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+func New(cfg config.Config) *Application {
+	logger := newLogger(cfg)
 
-	views, err := template.ParseGlob(filepath.Join("views", "*.html"))
+	router := chi.NewRouter()
+	handler := newHandler(logger)
+
+	views, err := template.ParseGlob(filepath.Join(cfg.Root, "views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
 		os.Exit(1)
 	}
 
-	router := chi.NewRouter()
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		err := r.Context().Value(xmate.ErrorKey{}).(error)
-
-		if httpErr := new(xmate.HTTPError); errors.As(err, &httpErr) {
-			_ = xmate.WriteText(w, httpErr.Code, httpErr.Message)
-			return
-		}
-
-		logger.Warn("failed to run http handler",
-			slog.String("method", r.Method),
-			slog.String("path", r.URL.Path),
-			slog.String("error", err.Error()),
-		)
-
-		_ = xmate.WriteText(w, http.StatusInternalServerError, "Internal Server Error")
-	}
-
 	return &Application{
+		cfg:     cfg,
 		logger:  logger,
 		router:  router,
 		handler: handler,
@@ -62,7 +51,7 @@ func (app *Application) Init() {
 	}.Router())
 
 	app.router.Handle("/*", http.FileServer(neuteredFileSystem{
-		fs: http.Dir("public"),
+		fs: http.Dir(filepath.Join(app.cfg.Root, "public")),
 	}))
 }
 
@@ -76,5 +65,47 @@ func (app *Application) Start() {
 	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		app.logger.Error("failed to listen and serve", "error", err)
 		os.Exit(1)
+	}
+}
+
+func newLogger(cfg config.Config) *slog.Logger {
+	opts := &slog.HandlerOptions{
+		Level: cfg.LogLevel,
+	}
+
+	var handler slog.Handler
+	switch cfg.Mode {
+	case config.ModeDev:
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	case config.ModeProd:
+		f, err := os.OpenFile(filepath.Join(cfg.Root, "app.log"),
+			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+		if err != nil {
+			panic(err)
+		}
+
+		handler = slog.NewJSONHandler(io.MultiWriter(os.Stdout, f), opts)
+	}
+
+	return slog.New(handler)
+}
+
+func newHandler(logger *slog.Logger) xmate.ErrorHandler {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.Context().Value(xmate.ErrorKey{}).(error)
+
+		if httpErr := new(xmate.HTTPError); errors.As(err, &httpErr) {
+			_ = xmate.WriteText(w, httpErr.Code, httpErr.Message)
+			return
+		}
+
+		logger.Warn("failed to run http handler",
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
+			slog.String("error", err.Error()),
+		)
+
+		_ = xmate.WriteText(w,
+			http.StatusInternalServerError, "Internal Server Error")
 	}
 }
