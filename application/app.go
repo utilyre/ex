@@ -2,10 +2,11 @@ package application
 
 import (
 	"errors"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
-	"text/template"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/utilyre/xmate"
@@ -21,7 +22,7 @@ type Application struct {
 func New() *Application {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	views, err := template.ParseGlob("./views/*.html")
+	views, err := template.ParseGlob(filepath.Join("views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
 		os.Exit(1)
@@ -54,7 +55,17 @@ func New() *Application {
 }
 
 func (app *Application) Init() {
+	app.router.Get("/",
+		app.handler.HandleFunc(func(w http.ResponseWriter, r *http.Request) error {
+			return xmate.WriteHTML(w, app.views.Lookup("home"), http.StatusOK, nil)
+		}),
+	)
+
 	// TODO: add routes
+
+	app.router.Handle("/*", http.FileServer(neuteredFileSystem{
+		fs: http.Dir("public"),
+	}))
 }
 
 func (app *Application) Start() {
