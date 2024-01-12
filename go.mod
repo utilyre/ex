@@ -1,4 +1,4 @@
-module github.com/utilyre/golang-backend-template
+module github.com/utilyre/ex
 
 go 1.21.5
 

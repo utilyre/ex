@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/utilyre/golang-backend-template/config"
-	"github.com/utilyre/golang-backend-template/routes"
+	"github.com/utilyre/ex/config"
+	"github.com/utilyre/ex/routes"
 	"github.com/utilyre/xmate"
 )
 
