@@ -21,14 +21,14 @@ type Config struct {
 }
 
 func (c *Config) Load() {
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
 	if root, ok := os.LookupEnv("EX_ROOT"); ok {
 		c.Root = root
 	} else {
+		cwd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
 		c.Root = cwd
 	}
 
