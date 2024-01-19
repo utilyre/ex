@@ -45,14 +45,17 @@ func New(cfg config.Config) *Application {
 }
 
 func (app *Application) Init() {
+	app.router.Mount("/public", http.StripPrefix(
+		"/public",
+		http.FileServer(neuteredFileSystem{
+			fs: http.Dir(filepath.Join(app.cfg.Root, "public")),
+		}),
+	))
+
 	app.router.Mount("/", routes.Home{
 		Handler:  app.handler,
 		HomeView: app.views.Lookup("home"),
 	}.Router())
-
-	app.router.Handle("/*", http.FileServer(neuteredFileSystem{
-		fs: http.Dir(filepath.Join(app.cfg.Root, "public")),
-	}))
 }
 
 func (app *Application) Start() {
