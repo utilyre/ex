@@ -60,7 +60,7 @@ func (app *Application) Init() {
 
 func (app *Application) Start() {
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    app.cfg.ServerAddr,
 		Handler: app.router,
 	}
 

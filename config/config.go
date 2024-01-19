@@ -16,6 +16,8 @@ type Config struct {
 	Root     string
 	Mode     Mode
 	LogLevel slog.Level
+
+	ServerAddr string
 }
 
 func (c *Config) Load() {
@@ -46,5 +48,9 @@ func (c *Config) Load() {
 		c.LogLevel = slog.LevelWarn
 	case "error":
 		c.LogLevel = slog.LevelError
+	}
+
+	if addr, ok := os.LookupEnv("EX_SERVER_ADDR"); ok {
+		c.ServerAddr = addr
 	}
 }
