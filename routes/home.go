@@ -9,7 +9,7 @@ import (
 )
 
 type Home struct {
-	Handler xmate.ErrorHandler
+	Handler  xmate.ErrorHandler
 	HomeView *template.Template
 }
 
