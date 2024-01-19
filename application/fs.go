@@ -2,7 +2,7 @@ package application
 
 import (
 	"net/http"
-	"path/filepath"
+	"os"
 )
 
 type neuteredFileSystem struct {
@@ -16,16 +16,11 @@ func (nfs neuteredFileSystem) Open(name string) (http.File, error) {
 	}
 
 	s, err := f.Stat()
-	if !s.IsDir() {
-		return f, nil
-	}
-
-	if _, err = nfs.fs.Open(filepath.Join(name, "index.html")); err != nil {
-		if err := f.Close(); err != nil {
-			return nil, err
-		}
-
+	if err != nil {
 		return nil, err
+	}
+	if s.IsDir() {
+		return nil, os.ErrNotExist
 	}
 
 	return f, nil
