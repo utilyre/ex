@@ -13,25 +13,14 @@ const (
 )
 
 type Config struct {
-	Root     string
 	Mode     Mode
 	LogLevel slog.Level
+	Root     string
 
 	ServerAddr string
 }
 
 func (c *Config) Load() {
-	if root, ok := os.LookupEnv("EX_ROOT"); ok {
-		c.Root = root
-	} else {
-		cwd, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-
-		c.Root = cwd
-	}
-
 	switch os.Getenv("EX_MODE") {
 	case "dev":
 		c.Mode = ModeDev
@@ -50,5 +39,15 @@ func (c *Config) Load() {
 		c.LogLevel = slog.LevelError
 	}
 
-	c.ServerAddr = os.Getenv("EX_SERVER_ADDR")
+	if root, ok := os.LookupEnv("EX_ROOT"); ok {
+		c.Root = root
+	} else {
+		c.Root = "."
+	}
+
+	if addr, ok := os.LookupEnv("EX_SERVER_ADDR"); ok {
+		c.ServerAddr = addr
+	} else {
+		c.ServerAddr = "127.0.0.1:3000"
+	}
 }
