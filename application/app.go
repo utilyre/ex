@@ -18,16 +18,13 @@ import (
 type Application struct {
 	cfg     config.Config
 	logger  *slog.Logger
+	views   *template.Template
 	router  chi.Router
 	handler xmate.ErrorHandler
-	views   *template.Template
 }
 
 func New(cfg config.Config) *Application {
 	logger := newLogger(cfg)
-
-	router := chi.NewRouter()
-	handler := newHandler(logger)
 
 	views, err := template.ParseGlob(filepath.Join(cfg.Root, "views", "*.html"))
 	if err != nil {
@@ -35,12 +32,15 @@ func New(cfg config.Config) *Application {
 		os.Exit(1)
 	}
 
+	router := chi.NewRouter()
+	handler := newHandler(logger, views.Lookup("error"))
+
 	return &Application{
 		cfg:     cfg,
 		logger:  logger,
+		views:   views,
 		router:  router,
 		handler: handler,
-		views:   views,
 	}
 }
 
@@ -93,22 +93,22 @@ func newLogger(cfg config.Config) *slog.Logger {
 	return slog.New(handler)
 }
 
-func newHandler(logger *slog.Logger) xmate.ErrorHandler {
+func newHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.Context().Value(xmate.ErrorKey{}).(error)
 
-		if httpErr := new(xmate.HTTPError); errors.As(err, &httpErr) {
-			_ = xmate.WriteText(w, httpErr.Code, httpErr.Message)
-			return
+		httpErr := new(xmate.HTTPError)
+		if !errors.As(err, &httpErr) {
+			httpErr.Code = http.StatusInternalServerError
+			httpErr.Message = "Internal Server Error"
+
+			logger.Warn("failed to run http handler",
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
+				slog.String("error", err.Error()),
+			)
 		}
 
-		logger.Warn("failed to run http handler",
-			slog.String("method", r.Method),
-			slog.String("path", r.URL.Path),
-			slog.String("error", err.Error()),
-		)
-
-		_ = xmate.WriteText(w,
-			http.StatusInternalServerError, "Internal Server Error")
+		_ = xmate.WriteHTML(w, errorView, httpErr.Code, httpErr)
 	}
 }
