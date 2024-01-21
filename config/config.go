@@ -52,7 +52,5 @@ func (c *Config) Load() {
 
 	if addr, ok := os.LookupEnv("EX_SERVER_ADDR"); ok {
 		c.ServerAddr = addr
-	} else {
-		c.ServerAddr = ":8080"
 	}
 }
