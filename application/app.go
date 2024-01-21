@@ -45,10 +45,10 @@ func New(cfg config.Config) *Application {
 }
 
 func (app *Application) Setup() {
-	app.router.Mount("/public", http.StripPrefix(
-		"/public",
+	app.router.Mount("/assets", http.StripPrefix(
+		"/assets",
 		http.FileServer(neuteredFileSystem{
-			fs: http.Dir(filepath.Join(app.cfg.Root, "public")),
+			fs: http.Dir(filepath.Join(app.cfg.Root, "assets")),
 		}),
 	))
 
