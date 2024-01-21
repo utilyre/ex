@@ -50,7 +50,5 @@ func (c *Config) Load() {
 		c.LogLevel = slog.LevelError
 	}
 
-	if addr, ok := os.LookupEnv("EX_SERVER_ADDR"); ok {
-		c.ServerAddr = addr
-	}
+	c.ServerAddr = os.Getenv("EX_SERVER_ADDR")
 }
