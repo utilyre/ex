@@ -44,7 +44,7 @@ func New(cfg config.Config) *Application {
 	}
 }
 
-func (app *Application) Init() {
+func (app *Application) Setup() {
 	app.router.Mount("/public", http.StripPrefix(
 		"/public",
 		http.FileServer(neuteredFileSystem{

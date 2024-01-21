@@ -10,6 +10,6 @@ func main() {
 	cfg.Load()
 
 	app := application.New(cfg)
-	app.Init()
+	app.Setup()
 	app.Start()
 }
