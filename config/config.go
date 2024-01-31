@@ -1,8 +1,12 @@
 package config
 
 import (
+	"flag"
+	"fmt"
 	"log/slog"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Mode int
@@ -14,40 +18,55 @@ const (
 
 type Config struct {
 	Mode     Mode
-	LogLevel slog.Level
 	Root     string
+	LogLevel slog.Level
 
 	ServerAddr string
 }
 
-func (c *Config) Load() {
-	switch os.Getenv("EX_MODE") {
+func Load() Config {
+	var mode string
+	flag.StringVar(&mode, "mode", "dev", "determine application mode (dev|prod)")
+	flag.Parse()
+
+	cfg := Config{}
+
+	switch mode {
 	case "dev":
-		c.Mode = ModeDev
+		cfg.Mode = ModeDev
+		if err := godotenv.Load(".env.local", ".env"); err != nil {
+			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
+			os.Exit(1)
+		}
 	case "prod":
-		c.Mode = ModeProd
+		cfg.Mode = ModeProd
+	default:
+		fmt.Fprintf(os.Stderr, "invalid argument '%s' for '-mode'\n", mode)
+		os.Exit(1)
 	}
 
-	switch os.Getenv("EX_LOG_LEVEL") {
+	if root, ok := os.LookupEnv("APP_ROOT"); ok {
+		cfg.Root = root
+	} else {
+		cfg.Root = "."
+	}
+
+	switch os.Getenv("LOG_LEVEL") {
 	case "debug":
-		c.LogLevel = slog.LevelDebug
+		cfg.LogLevel = slog.LevelDebug
 	case "info":
-		c.LogLevel = slog.LevelInfo
+		cfg.LogLevel = slog.LevelInfo
 	case "warn":
-		c.LogLevel = slog.LevelWarn
+		cfg.LogLevel = slog.LevelWarn
 	case "error":
-		c.LogLevel = slog.LevelError
+		cfg.LogLevel = slog.LevelError
 	}
 
-	if root, ok := os.LookupEnv("EX_ROOT"); ok {
-		c.Root = root
+	if addr, ok := os.LookupEnv("SERVER_ADDR"); ok {
+		cfg.ServerAddr = addr
 	} else {
-		c.Root = "."
+		cfg.ServerAddr = "127.0.0.1:3000"
 	}
 
-	if addr, ok := os.LookupEnv("EX_SERVER_ADDR"); ok {
-		c.ServerAddr = addr
-	} else {
-		c.ServerAddr = "127.0.0.1:3000"
-	}
+	return cfg
 }
