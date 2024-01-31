@@ -30,7 +30,7 @@ func (m Mode) String() string {
 
 type Config struct {
 	Mode     Mode
-	Root     string
+	AppRoot  string
 	LogLevel slog.Level
 
 	ServerAddr string
@@ -58,9 +58,9 @@ func Load() Config {
 	}
 
 	if root, ok := os.LookupEnv("APP_ROOT"); ok {
-		cfg.Root = root
+		cfg.AppRoot = root
 	} else {
-		cfg.Root = "."
+		cfg.AppRoot = "."
 	}
 
 	switch os.Getenv("LOG_LEVEL") {

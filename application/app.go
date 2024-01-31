@@ -26,7 +26,7 @@ type Application struct {
 func New(cfg config.Config) *Application {
 	logger := newLogger(cfg)
 
-	views, err := template.ParseGlob(filepath.Join(cfg.Root, "views", "*.html"))
+	views, err := template.ParseGlob(filepath.Join(cfg.AppRoot, "views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
 		os.Exit(1)
@@ -48,7 +48,7 @@ func (app *Application) Setup() *Application {
 	app.router.Mount("/assets", http.StripPrefix(
 		"/assets",
 		http.FileServer(neuteredFileSystem{
-			fs: http.Dir(filepath.Join(app.cfg.Root, "assets")),
+			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "assets")),
 		}),
 	))
 
@@ -85,7 +85,7 @@ func newLogger(cfg config.Config) *slog.Logger {
 	case config.ModeDev:
 		handler = slog.NewTextHandler(os.Stdout, opts)
 	case config.ModeProd:
-		f, err := os.OpenFile(filepath.Join(cfg.Root, "app.log"),
+		f, err := os.OpenFile(filepath.Join(cfg.AppRoot, "app.log"),
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			panic(err)
