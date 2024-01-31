@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"errors"
 	"html/template"
 	"io"
@@ -10,6 +11,9 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/sqlitedialect"
+	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/utilyre/ex/config"
 	"github.com/utilyre/ex/routes"
 	"github.com/utilyre/xmate"
@@ -21,6 +25,7 @@ type Application struct {
 	views   *template.Template
 	router  chi.Router
 	handler xmate.ErrorHandler
+	db      *bun.DB
 }
 
 func New(cfg config.Config) *Application {
@@ -35,12 +40,20 @@ func New(cfg config.Config) *Application {
 	router := chi.NewRouter()
 	handler := newHandler(logger, views.Lookup("error"))
 
+	sqldb, err := sql.Open(sqliteshim.ShimName, filepath.Join(cfg.AppRoot, "data.db"))
+	if err != nil {
+		logger.Error("failed to open connection to database", "error", err)
+		os.Exit(1)
+	}
+	db := bun.NewDB(sqldb, sqlitedialect.New())
+
 	return &Application{
 		cfg:     cfg,
 		logger:  logger,
 		views:   views,
 		router:  router,
 		handler: handler,
+		db:      db,
 	}
 }
 
