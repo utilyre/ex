@@ -87,15 +87,10 @@ func Load() Config {
 		cfg.AppRoot = "."
 	}
 
-	switch os.Getenv("LOG_LEVEL") {
-	case "debug":
-		cfg.LogLevel = slog.LevelDebug
-	case "info":
-		cfg.LogLevel = slog.LevelInfo
-	case "warn":
-		cfg.LogLevel = slog.LevelWarn
-	case "error":
-		cfg.LogLevel = slog.LevelError
+	logLevel := os.Getenv("LOG_LEVEL")
+	if err := cfg.LogLevel.UnmarshalText([]byte(logLevel)); err != nil {
+		fmt.Fprintf(os.Stderr, "invalid value '%s' for 'LOG_LEVEL'\n", logLevel)
+		os.Exit(1)
 	}
 
 	if addr, ok := os.LookupEnv("SERVER_ADDR"); ok {
