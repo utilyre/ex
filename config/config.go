@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -15,6 +16,17 @@ const (
 	ModeDev = iota
 	ModeProd
 )
+
+func (m Mode) String() string {
+	switch m {
+	case ModeDev:
+		return "dev"
+	case ModeProd:
+		return "prod"
+	default:
+		return ""
+	}
+}
 
 type Config struct {
 	Mode     Mode

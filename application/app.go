@@ -61,6 +61,8 @@ func (app *Application) Setup() *Application {
 }
 
 func (app *Application) Start() {
+	app.logger.Info("starting server application", "config", app.cfg)
+
 	srv := &http.Server{
 		Addr:    app.cfg.ServerAddr,
 		Handler: app.router,
