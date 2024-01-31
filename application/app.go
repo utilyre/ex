@@ -40,7 +40,8 @@ func New(cfg config.Config) *Application {
 	router := chi.NewRouter()
 	handler := newHandler(logger, views.Lookup("error"))
 
-	sqldb, err := sql.Open(sqliteshim.ShimName, filepath.Join(cfg.AppRoot, "data.db"))
+	logger.Info("opening connection to database", "dsn", cfg.DSN)
+	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
 	if err != nil {
 		logger.Error("failed to open connection to database", "error", err)
 		os.Exit(1)

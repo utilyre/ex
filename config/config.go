@@ -34,6 +34,7 @@ type Config struct {
 	LogLevel slog.Level
 
 	ServerAddr string
+	DSN        string
 }
 
 func Load() Config {
@@ -79,6 +80,8 @@ func Load() Config {
 	} else {
 		cfg.ServerAddr = "127.0.0.1:3000"
 	}
+
+	cfg.DSN = os.Getenv("DSN")
 
 	return cfg
 }
