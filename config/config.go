@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -33,7 +34,7 @@ func (m Mode) MarshalText() ([]byte, error) {
 }
 
 func (m *Mode) UnmarshalText(text []byte) error {
-	switch string(text) {
+	switch strings.ToUpper(string(text)) {
 	case "DEV":
 		*m = ModeDev
 	case "PROD":
