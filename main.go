@@ -7,8 +7,5 @@ import (
 
 func main() {
 	cfg := config.Load()
-
-	app := application.New(cfg)
-	app.Setup()
-	app.Start()
+	application.New(cfg).Setup().Start()
 }

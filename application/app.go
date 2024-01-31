@@ -44,7 +44,7 @@ func New(cfg config.Config) *Application {
 	}
 }
 
-func (app *Application) Setup() {
+func (app *Application) Setup() *Application {
 	app.router.Mount("/assets", http.StripPrefix(
 		"/assets",
 		http.FileServer(neuteredFileSystem{
@@ -56,6 +56,8 @@ func (app *Application) Setup() {
 		Handler:  app.handler,
 		HomeView: app.views.Lookup("home"),
 	}.Router())
+
+	return app
 }
 
 func (app *Application) Start() {
