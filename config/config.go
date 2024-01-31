@@ -20,12 +20,29 @@ const (
 func (m Mode) String() string {
 	switch m {
 	case ModeDev:
-		return "dev"
+		return "DEV"
 	case ModeProd:
-		return "prod"
+		return "PROD"
 	default:
 		return ""
 	}
+}
+
+func (m Mode) MarshalText() ([]byte, error) {
+	return []byte(m.String()), nil
+}
+
+func (m *Mode) UnmarshalText(text []byte) error {
+	switch string(text) {
+	case "DEV":
+		*m = ModeDev
+	case "PROD":
+		*m = ModeProd
+	default:
+		return errors.New("unknown name")
+	}
+
+	return nil
 }
 
 type Config struct {
@@ -39,13 +56,17 @@ type Config struct {
 
 func Load() Config {
 	var mode string
-	flag.StringVar(&mode, "mode", "dev", "determine application mode (dev|prod)")
+	flag.StringVar(&mode, "mode", "DEV", "determine application mode (DEV|PROD)")
 	flag.Parse()
 
 	cfg := Config{}
+	if err := cfg.Mode.UnmarshalText([]byte(mode)); err != nil {
+		fmt.Fprintf(os.Stderr, "invalid argument '%s' for '-mode'\n", mode)
+		os.Exit(1)
+	}
 
-	switch mode {
-	case "dev":
+	switch cfg.Mode {
+	case ModeDev:
 		cfg.Mode = ModeDev
 
 		if err := godotenv.Load(".env.local"); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -56,11 +77,8 @@ func Load() Config {
 			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
 			os.Exit(1)
 		}
-	case "prod":
+	case ModeProd:
 		cfg.Mode = ModeProd
-	default:
-		fmt.Fprintf(os.Stderr, "invalid argument '%s' for '-mode'\n", mode)
-		os.Exit(1)
 	}
 
 	if root, ok := os.LookupEnv("APP_ROOT"); ok {
