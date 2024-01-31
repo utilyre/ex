@@ -47,7 +47,12 @@ func Load() Config {
 	switch mode {
 	case "dev":
 		cfg.Mode = ModeDev
-		if err := godotenv.Load(".env.local", ".env"); err != nil && !errors.Is(err, os.ErrNotExist) {
+
+		if err := godotenv.Load(".env.local"); err != nil && !errors.Is(err, os.ErrNotExist) {
+			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
+			os.Exit(1)
+		}
+		if err := godotenv.Load(".env"); err != nil {
 			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
 			os.Exit(1)
 		}
