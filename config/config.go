@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var ErrUnknownName = errors.New("unknown name")
+
 type Mode int
 
 const (
@@ -34,13 +36,14 @@ func (m Mode) MarshalText() ([]byte, error) {
 }
 
 func (m *Mode) UnmarshalText(text []byte) error {
-	switch strings.ToUpper(string(text)) {
+	mode := string(text)
+	switch strings.ToUpper(mode) {
 	case "DEV":
 		*m = ModeDev
 	case "PROD":
 		*m = ModeProd
 	default:
-		return errors.New("unknown name")
+		return fmt.Errorf("mode string \"%s\": %w", mode, ErrUnknownName)
 	}
 
 	return nil
@@ -48,59 +51,41 @@ func (m *Mode) UnmarshalText(text []byte) error {
 
 type Config struct {
 	Mode     Mode
-	AppRoot  string
 	LogLevel slog.Level
+	AppRoot  string
 
 	ServerAddr string
 	DSN        string
 }
 
-func Load() Config {
+func Load() (Config, error) {
+	cfg := Config{}
+
 	var mode string
 	flag.StringVar(&mode, "mode", "DEV", "determine application mode (DEV|PROD)")
 	flag.Parse()
 
-	cfg := Config{}
 	if err := cfg.Mode.UnmarshalText([]byte(mode)); err != nil {
-		fmt.Fprintf(os.Stderr, "invalid argument '%s' for '-mode'\n", mode)
-		os.Exit(1)
+		return Config{}, fmt.Errorf("config: %w", err)
 	}
 
-	switch cfg.Mode {
-	case ModeDev:
-		cfg.Mode = ModeDev
-
+	if cfg.Mode == ModeDev {
 		if err := godotenv.Load(".env.local"); err != nil && !errors.Is(err, os.ErrNotExist) {
-			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
-			os.Exit(1)
+			return Config{}, fmt.Errorf("godotenv: %w", err)
 		}
+
 		if err := godotenv.Load(".env"); err != nil {
-			fmt.Fprintf(os.Stderr, "godotenv: %v\n", err)
-			os.Exit(1)
+			return Config{}, fmt.Errorf("godotenv: %w", err)
 		}
-	case ModeProd:
-		cfg.Mode = ModeProd
 	}
 
-	if root, ok := os.LookupEnv("APP_ROOT"); ok {
-		cfg.AppRoot = root
-	} else {
-		cfg.AppRoot = "."
+	if err := cfg.LogLevel.UnmarshalText([]byte(os.Getenv("LOG_LEVEL"))); err != nil {
+		return Config{}, err
 	}
 
-	logLevel := os.Getenv("LOG_LEVEL")
-	if err := cfg.LogLevel.UnmarshalText([]byte(logLevel)); err != nil {
-		fmt.Fprintf(os.Stderr, "invalid value '%s' for 'LOG_LEVEL'\n", logLevel)
-		os.Exit(1)
-	}
-
-	if addr, ok := os.LookupEnv("SERVER_ADDR"); ok {
-		cfg.ServerAddr = addr
-	} else {
-		cfg.ServerAddr = "127.0.0.1:3000"
-	}
-
+	cfg.AppRoot = os.Getenv("APP_ROOT")
+	cfg.ServerAddr = os.Getenv("SERVER_ADDR")
 	cfg.DSN = os.Getenv("DSN")
 
-	return cfg
+	return cfg, nil
 }
