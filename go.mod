@@ -4,14 +4,11 @@ go 1.21.5
 
 require (
 	github.com/go-chi/chi/v5 v5.0.11
-	github.com/utilyre/xmate v1.2.5
-)
-
-require (
 	github.com/joho/godotenv v1.5.1
 	github.com/uptrace/bun v1.1.17
 	github.com/uptrace/bun/dialect/sqlitedialect v1.1.17
 	github.com/uptrace/bun/driver/sqliteshim v1.1.17
+	github.com/utilyre/xmate v1.2.5
 )
 
 require (
