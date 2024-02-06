@@ -99,7 +99,7 @@ func newLogger(cfg config.Config) *slog.Logger {
 	case config.ModeDev:
 		handler = slog.NewTextHandler(os.Stdout, opts)
 	case config.ModeProd:
-		f, err := os.OpenFile(filepath.Join(cfg.AppRoot, "app.log"),
+		f, err := os.OpenFile(filepath.Join(cfg.AppRoot, "server.log"),
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			panic(err)
