@@ -10,15 +10,12 @@ RUN ./scripts/build.sh
 
 FROM alpine:3.19
 
-ARG APP_ROOT=/app
-ARG SERVER_PORT=80
+COPY --from=builder /app/build /app
 
 ENV LOG_LEVEL=INFO
-ENV APP_ROOT=${APP_ROOT}
-ENV SERVER_ADDR=0.0.0.0:${SERVER_PORT}
+ENV APP_ROOT=/app
+ENV SERVER_ADDR=0.0.0.0:80
 ENV DSN=/app/data.db
 
-COPY --from=builder /app/build ${APP_ROOT}
-
-EXPOSE ${SERVER_PORT}
+EXPOSE 80
 CMD /app/server -mode prod
