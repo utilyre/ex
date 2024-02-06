@@ -11,7 +11,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var ErrUnknownName = errors.New("unknown name")
+var (
+	ErrUnknownName = errors.New("unknown name")
+	ErrNotPresent  = errors.New("not present")
+)
 
 type Mode int
 
@@ -66,16 +69,21 @@ func Load() (Config, error) {
 	flag.Parse()
 
 	if err := cfg.Mode.UnmarshalText([]byte(mode)); err != nil {
-		return Config{}, fmt.Errorf("config: %w", err)
+		return Config{}, err
 	}
 
-	if cfg.Mode == ModeDev {
+	switch cfg.Mode {
+	case ModeDev:
 		if err := godotenv.Load(".env.local"); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return Config{}, fmt.Errorf("godotenv: %w", err)
 		}
 
 		if err := godotenv.Load(".env"); err != nil {
 			return Config{}, fmt.Errorf("godotenv: %w", err)
+		}
+	case ModeProd:
+		if err := validateEnv("LOG_LEVEL", "APP_ROOT", "SERVER_ADDR", "DSN"); err != nil {
+			return Config{}, err
 		}
 	}
 
@@ -88,4 +96,15 @@ func Load() (Config, error) {
 	cfg.DSN = os.Getenv("DSN")
 
 	return cfg, nil
+}
+
+func validateEnv(keys ...string) error {
+	for _, key := range keys {
+		_, ok := os.LookupEnv(key)
+		if !ok {
+			return fmt.Errorf("environment variable \"%s\": %w", key, ErrNotPresent)
+		}
+	}
+
+	return nil
 }

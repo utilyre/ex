@@ -11,7 +11,7 @@ import (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "config: %v\n", err)
 		os.Exit(1)
 	}
 
