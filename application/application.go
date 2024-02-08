@@ -103,6 +103,7 @@ func newHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHa
 			httpErr.Message = "Internal Server Error"
 
 			logger.Warn("failed to run http handler",
+				slog.String("remote", r.RemoteAddr),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
 				slog.String("error", err.Error()),
