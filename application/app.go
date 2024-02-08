@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"html/template"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -30,9 +29,7 @@ type Application struct {
 	db       *bun.DB
 }
 
-func New(cfg config.Config) *Application {
-	logger := newLogger(cfg)
-
+func New(cfg config.Config, logger *slog.Logger) *Application {
 	views, err := template.ParseGlob(filepath.Join(cfg.AppRoot, "views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
@@ -88,28 +85,6 @@ func (app *Application) Start() {
 		app.logger.Error("failed to listen and serve", "error", err)
 		os.Exit(1)
 	}
-}
-
-func newLogger(cfg config.Config) *slog.Logger {
-	opts := &slog.HandlerOptions{
-		Level: cfg.LogLevel,
-	}
-
-	var handler slog.Handler
-	switch cfg.Mode {
-	case config.ModeDev:
-		handler = slog.NewTextHandler(os.Stdout, opts)
-	case config.ModeProd:
-		f, err := os.OpenFile(filepath.Join(cfg.AppRoot, "server.log"),
-			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
-		if err != nil {
-			panic(err)
-		}
-
-		handler = slog.NewJSONHandler(io.MultiWriter(os.Stdout, f), opts)
-	}
-
-	return slog.New(handler)
 }
 
 func newHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHandler {
