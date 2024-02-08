@@ -15,6 +15,7 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/utilyre/ex/config"
+	"github.com/utilyre/ex/middlewares"
 	"github.com/utilyre/ex/routes"
 	"github.com/utilyre/xmate"
 )
@@ -59,6 +60,11 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 }
 
 func (app *Application) Setup() *Application {
+	app.router.Use(
+		middlewares.NewRecoverer(app.logger),
+		middlewares.NewLogger(app.logger),
+	)
+
 	app.router.Mount("/assets", http.StripPrefix(
 		"/assets",
 		http.FileServer(neuteredFileSystem{
