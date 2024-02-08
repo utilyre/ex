@@ -40,10 +40,9 @@ func New(cfg config.Config) *Application {
 	router := chi.NewRouter()
 	handler := newHandler(logger, views.Lookup("error"))
 
-	logger.Info("opening connection to database", "dsn", cfg.DSN)
 	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
 	if err != nil {
-		logger.Error("failed to open connection to database", "error", err)
+		logger.Error("failed to open connection to database", "dsn", cfg.DSN, "error", err)
 		os.Exit(1)
 	}
 	db := bun.NewDB(sqldb, sqlitedialect.New())
@@ -75,8 +74,6 @@ func (app *Application) Setup() *Application {
 }
 
 func (app *Application) Start() {
-	app.logger.Info("starting server application", "config", app.cfg)
-
 	srv := &http.Server{
 		Addr:    app.cfg.ServerAddr,
 		Handler: app.router,
