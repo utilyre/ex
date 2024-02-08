@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
@@ -20,12 +21,13 @@ import (
 )
 
 type Application struct {
-	cfg     config.Config
-	logger  *slog.Logger
-	views   *template.Template
-	router  chi.Router
-	handler xmate.ErrorHandler
-	db      *bun.DB
+	cfg      config.Config
+	logger   *slog.Logger
+	views    *template.Template
+	router   chi.Router
+	handler  xmate.ErrorHandler
+	validate *validator.Validate
+	db       *bun.DB
 }
 
 func New(cfg config.Config) *Application {
@@ -39,6 +41,7 @@ func New(cfg config.Config) *Application {
 
 	router := chi.NewRouter()
 	handler := newHandler(logger, views.Lookup("error"))
+	validate := validator.New()
 
 	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
 	if err != nil {
@@ -48,12 +51,13 @@ func New(cfg config.Config) *Application {
 	db := bun.NewDB(sqldb, sqlitedialect.New())
 
 	return &Application{
-		cfg:     cfg,
-		logger:  logger,
-		views:   views,
-		router:  router,
-		handler: handler,
-		db:      db,
+		cfg:      cfg,
+		logger:   logger,
+		views:    views,
+		router:   router,
+		handler:  handler,
+		validate: validate,
+		db:       db,
 	}
 }
 
