@@ -3,11 +3,14 @@ package middlewares
 import (
 	"log/slog"
 	"net/http"
+
+	"github.com/utilyre/ex/router"
+	"github.com/utilyre/xmate"
 )
 
-func NewRecoverer(logger *slog.Logger) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func NewRecoverer(logger *slog.Logger) router.Middleware {
+	return func(next xmate.Handler) xmate.Handler {
+		return xmate.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
 			defer func() {
 				msg := recover()
 				if msg == nil {
@@ -22,7 +25,7 @@ func NewRecoverer(logger *slog.Logger) func(next http.Handler) http.Handler {
 				)
 			}()
 
-			next.ServeHTTP(w, r)
+			return next.ServeHTTP(w, r)
 		})
 	}
 }

@@ -9,13 +9,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/utilyre/ex/config"
 	"github.com/utilyre/ex/middlewares"
+	"github.com/utilyre/ex/router"
 	"github.com/utilyre/ex/routes"
 	"github.com/utilyre/xmate"
 )
@@ -24,8 +24,7 @@ type Application struct {
 	cfg      config.Config
 	logger   *slog.Logger
 	views    *template.Template
-	router   chi.Router
-	handler  xmate.ErrorHandler
+	router   *router.Router
 	validate *validator.Validate
 	db       *bun.DB
 }
@@ -37,8 +36,7 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 		os.Exit(1)
 	}
 
-	router := chi.NewRouter()
-	handler := newHandler(logger, views.Lookup("error"))
+	router := router.New(newHandler(logger, views.Lookup("error")))
 	validate := validator.New()
 
 	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
@@ -53,29 +51,24 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 		logger:   logger,
 		views:    views,
 		router:   router,
-		handler:  handler,
 		validate: validate,
 		db:       db,
 	}
 }
 
 func (app *Application) Setup() *Application {
-	app.router.Use(
-		middlewares.NewRecoverer(app.logger),
-		middlewares.NewLogger(app.logger),
-	)
+	app.router.Use(middlewares.NewRecoverer(app.logger))
+	app.router.Use(middlewares.NewLogger(app.logger))
 
-	app.router.Mount("/assets", http.StripPrefix(
-		"/assets",
-		http.FileServer(neuteredFileSystem{
-			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "assets")),
-		}),
-	))
-
-	app.router.Mount("/", routes.Home{
-		Handler:  app.handler,
+	home := routes.Home{
 		HomeView: app.views.Lookup("home"),
-	}.Router())
+	}
+	app.router.HandleFunc("GET /{$}", home.Page)
+
+	app.router.HandleUnsafe("GET /assets/",
+		http.StripPrefix("/assets", http.FileServer(neuteredFileSystem{
+			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "assets")),
+		})))
 
 	return app
 }
