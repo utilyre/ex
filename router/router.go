@@ -22,6 +22,14 @@ func New(eh xmate.ErrorHandler) *Router {
 	}
 }
 
+func (r *Router) Group(fn func(r *Router)) {
+	fn(&Router{
+		mux:          r.mux,
+		errorHandler: r.errorHandler,
+		middlewares:  append([]Middleware(nil), r.middlewares...),
+	})
+}
+
 func (r *Router) Use(mw Middleware) {
 	r.middlewares = append(r.middlewares, mw)
 }
