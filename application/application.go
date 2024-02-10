@@ -65,10 +65,9 @@ func (app *Application) Setup() *Application {
 	}
 	app.router.HandleFunc("GET /{$}", home.Page)
 
-	app.router.HandleUnsafe("GET /assets/",
-		http.StripPrefix("/assets", http.FileServer(neuteredFileSystem{
-			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "assets")),
-		})))
+	app.router.HandleUnsafe("GET /", http.FileServer(neuteredFileSystem{
+		fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
+	}))
 
 	return app
 }
