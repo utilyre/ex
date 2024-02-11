@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -10,19 +11,14 @@ import (
 
 func NewRecoverer(logger *slog.Logger) router.Middleware {
 	return func(next xmate.Handler) xmate.Handler {
-		return xmate.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+		return xmate.HandlerFunc(func(w http.ResponseWriter, r *http.Request) (err error) {
 			defer func() {
 				msg := recover()
 				if msg == nil {
 					return
 				}
 
-				logger.Warn("failed to run http handler (panicked)",
-					slog.String("remote", r.RemoteAddr),
-					slog.String("method", r.Method),
-					slog.String("path", r.URL.Path),
-					slog.Any("message", msg),
-				)
+				err = fmt.Errorf("panic: %v", msg)
 			}()
 
 			return next.ServeHTTP(w, r)

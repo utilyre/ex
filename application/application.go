@@ -57,8 +57,8 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 }
 
 func (app *Application) Setup() *Application {
-	app.router.Use(middlewares.NewRecoverer(app.logger))
 	app.router.Use(middlewares.NewLogger(app.logger))
+	app.router.Use(middlewares.NewRecoverer(app.logger))
 
 	app.router.Group(func(r *router.Router) {
 		home := routes.Home{
@@ -102,13 +102,6 @@ func newHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHa
 		if !errors.As(err, &httpErr) {
 			httpErr.Code = http.StatusInternalServerError
 			httpErr.Message = "Internal Server Error"
-
-			logger.Warn("failed to run http handler",
-				slog.String("remote", r.RemoteAddr),
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
-				slog.String("error", err.Error()),
-			)
 		}
 
 		_ = xmate.WriteHTML(w, errorView, httpErr.Code, httpErr)
