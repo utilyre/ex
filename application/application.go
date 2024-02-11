@@ -36,7 +36,7 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 		os.Exit(1)
 	}
 
-	router := router.New(newHandler(logger, views.Lookup("error")))
+	router := router.New(newErrorHandler(logger, views.Lookup("error")))
 	validate := validator.New()
 
 	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
@@ -94,7 +94,7 @@ func (app *Application) Start() {
 	}
 }
 
-func newHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHandler {
+func newErrorHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.Context().Value(xmate.ErrorKey{}).(error)
 
