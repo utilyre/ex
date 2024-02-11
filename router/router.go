@@ -34,10 +34,6 @@ func (r *Router) Use(mw Middleware) {
 	r.middlewares = append(r.middlewares, mw)
 }
 
-func (r *Router) HandleUnsafe(pattern string, handler http.Handler) {
-	r.mux.Handle(pattern, handler)
-}
-
 func (r *Router) Handle(pattern string, handler xmate.Handler) {
 	for i := len(r.middlewares) - 1; i >= 0; i-- {
 		handler = r.middlewares[i](handler)

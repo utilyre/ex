@@ -68,9 +68,15 @@ func (app *Application) Setup() *Application {
 		r.HandleFunc("GET /{$}", home.Page)
 	})
 
-	app.router.HandleUnsafe("GET /", http.FileServer(neuteredFileSystem{
-		fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
-	}))
+	app.router.Group(func(r *router.Router) {
+		public := routes.Public{
+			FileServer: http.FileServer(neuteredFileSystem{
+				fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
+			}),
+		}
+
+		r.Handle("/", public)
+	})
 
 	return app
 }
