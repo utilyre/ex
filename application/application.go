@@ -41,7 +41,7 @@ func New(cfg config.Config, logger *slog.Logger) *Application {
 
 	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
 	if err != nil {
-		logger.Error("failed to open connection to database", "dsn", cfg.DSN, "error", err)
+		logger.Error("failed to open database connection", "dsn", cfg.DSN, "error", err)
 		os.Exit(1)
 	}
 	db := bun.NewDB(sqldb, sqlitedialect.New())
