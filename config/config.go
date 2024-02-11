@@ -72,8 +72,7 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("config: %w", err)
 	}
 
-	switch cfg.Mode {
-	case ModeDev:
+	if cfg.Mode == ModeDev {
 		if err := godotenv.Load(".env.local"); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return Config{}, fmt.Errorf("config: %w", err)
 		}
@@ -81,16 +80,14 @@ func Load() (Config, error) {
 		if err := godotenv.Load(".env"); err != nil {
 			return Config{}, fmt.Errorf("config: %w", err)
 		}
-	case ModeProd:
-		if err := validateEnv("LOG_LEVEL", "APP_ROOT", "SERVER_ADDR", "DSN"); err != nil {
-			return Config{}, fmt.Errorf("config: %w", err)
-		}
+	}
+	if err := validateEnv("LOG_LEVEL", "APP_ROOT", "SERVER_ADDR", "DSN"); err != nil {
+		return Config{}, fmt.Errorf("config: %w", err)
 	}
 
 	if err := cfg.LogLevel.UnmarshalText([]byte(os.Getenv("LOG_LEVEL"))); err != nil {
 		return Config{}, err
 	}
-
 	cfg.AppRoot = os.Getenv("APP_ROOT")
 	cfg.ServerAddr = os.Getenv("SERVER_ADDR")
 	cfg.DSN = os.Getenv("DSN")
