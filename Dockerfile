@@ -18,4 +18,4 @@ ENV SERVER_ADDR=0.0.0.0:80
 ENV DSN=/app/data.db
 
 EXPOSE 80
-CMD /app/server -mode prod
+CMD /app/server -mode PROD
