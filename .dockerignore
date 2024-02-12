@@ -1,0 +1,13 @@
+*.local
+*.log
+*.md
+
+/.git
+/.github
+/build
+/.dockerignore
+/.editorconfig
+/.env
+/.gitignore
+/Dockerfile
+/data.db
