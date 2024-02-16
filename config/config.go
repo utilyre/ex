@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var ErrUnknownName = errors.New("unknown name")
+var ErrInvalidMode = errors.New("invalid mode")
 
 type Mode int
 
@@ -20,19 +20,15 @@ const (
 	ModeProd
 )
 
-func (m Mode) String() string {
+func (m Mode) MarshalText() ([]byte, error) {
 	switch m {
 	case ModeDev:
-		return "DEV"
+		return []byte("DEV"), nil
 	case ModeProd:
-		return "PROD"
+		return []byte("PROD"), nil
 	default:
-		return ""
+		return nil, ErrInvalidMode
 	}
-}
-
-func (m Mode) MarshalText() ([]byte, error) {
-	return []byte(m.String()), nil
 }
 
 func (m *Mode) UnmarshalText(text []byte) error {
@@ -43,7 +39,7 @@ func (m *Mode) UnmarshalText(text []byte) error {
 	case "PROD":
 		*m = ModeProd
 	default:
-		return fmt.Errorf("mode string \"%s\": %w", mode, ErrUnknownName)
+		return fmt.Errorf("string \"%s\": %w", mode, ErrInvalidMode)
 	}
 
 	return nil
