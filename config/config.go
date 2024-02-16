@@ -46,12 +46,12 @@ func (m *Mode) UnmarshalText(text []byte) error {
 }
 
 type Config struct {
-	Mode     Mode       `env:"MODE,required"`
-	LogLevel slog.Level `env:"LOG_LEVEL,required"`
-	AppRoot  string     `env:"APP_ROOT,required"`
+	Mode       Mode       `env:"MODE,required"`
+	LogLevel   slog.Level `env:"LOG_LEVEL,required"`
+	AppRoot    string     `env:"APP_ROOT,required"`
+	ServerAddr string     `env:"SERVER_ADDR,required"`
 
-	ServerAddr string `env:"SERVER_ADDR,required"`
-	DSN        string `env:"DSN,required"`
+	DSN string `env:"DSN,required"`
 }
 
 func Load() (Config, error) {
