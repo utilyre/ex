@@ -3,6 +3,7 @@ module github.com/utilyre/ex
 go 1.22.0
 
 require (
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/go-playground/validator/v10 v10.17.0
 	github.com/joho/godotenv v1.5.1
 	github.com/uptrace/bun v1.1.17
