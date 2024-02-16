@@ -12,11 +12,10 @@ FROM alpine:3.19
 
 COPY --from=builder /app/build /app
 
-ENV MODE=PROD
-ENV LOG_LEVEL=INFO
-ENV APP_ROOT=/app
-ENV SERVER_ADDR=0.0.0.0:80
-ENV DSN=/app/data.db
+ENV MODE="PROD"
+ENV LOG_LEVEL="INFO"
+ENV APP_ROOT="/app"
+ENV SERVER_ADDR="0.0.0.0:80"
 
 EXPOSE 80
 CMD /app/server
