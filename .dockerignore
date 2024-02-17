@@ -9,5 +9,4 @@
 /.editorconfig
 /.env
 /.gitignore
-/Dockerfile
 /data.db
