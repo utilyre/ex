@@ -29,7 +29,9 @@ type Application struct {
 	db       *bun.DB
 }
 
-func New(cfg config.Config, logger *slog.Logger) *Application {
+func New(cfg config.Config) *Application {
+	logger := newLogger(cfg.Mode, cfg.LogLevel)
+
 	views, err := template.ParseGlob(filepath.Join(cfg.AppRoot, "views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
@@ -92,6 +94,20 @@ func (app *Application) Start() {
 		app.logger.Error("failed to listen and serve", "error", err)
 		os.Exit(1)
 	}
+}
+
+func newLogger(mode config.Mode, level slog.Level) *slog.Logger {
+	opts := &slog.HandlerOptions{Level: level}
+
+	var handler slog.Handler
+	switch mode {
+	case config.ModeDev:
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	case config.ModeProd:
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	}
+
+	return slog.New(handler)
 }
 
 func newErrorHandler(logger *slog.Logger, errorView *template.Template) xmate.ErrorHandler {

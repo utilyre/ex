@@ -15,14 +15,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger, err := application.NewLogger(cfg)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ex: %v\n", err)
-		os.Exit(1)
-	}
-
 	application.
-		New(cfg, logger).
+		New(cfg).
 		Setup().
 		Start()
 }
