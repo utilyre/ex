@@ -6,19 +6,20 @@ import (
 	"github.com/utilyre/xmate"
 )
 
+type serveMux = http.ServeMux
 type Middleware func(next xmate.Handler) xmate.Handler
 
 type Router struct {
-	mux          *http.ServeMux
-	errorHandler xmate.ErrorHandler
-	middlewares  []Middleware
+	*serveMux
+	handler     xmate.ErrorHandler
+	middlewares []Middleware
 }
 
-func New(eh xmate.ErrorHandler) *Router {
+func New(handler xmate.ErrorHandler) *Router {
 	return &Router{
-		mux:          http.NewServeMux(),
-		errorHandler: eh,
-		middlewares:  []Middleware{},
+		serveMux:    http.NewServeMux(),
+		handler:     handler,
+		middlewares: []Middleware{},
 	}
 }
 
@@ -34,7 +35,7 @@ func (r *Router) Handle(pattern string, handler xmate.Handler, middlewares ...Mi
 		handler = middlewares[i](handler)
 	}
 
-	r.mux.Handle(pattern, r.errorHandler.Handle(handler))
+	r.serveMux.Handle(pattern, r.handler.Handle(handler))
 }
 
 func (r *Router) HandleFunc(pattern string, handler xmate.HandlerFunc, middlewares ...Middleware) {
@@ -45,9 +46,5 @@ func (r *Router) HandleFunc(pattern string, handler xmate.HandlerFunc, middlewar
 		handler = middlewares[i](handler).ServeHTTP
 	}
 
-	r.mux.HandleFunc(pattern, r.errorHandler.HandleFunc(handler))
-}
-
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	r.mux.ServeHTTP(w, req)
+	r.serveMux.HandleFunc(pattern, r.handler.HandleFunc(handler))
 }
