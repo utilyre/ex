@@ -14,9 +14,7 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/utilyre/ex/config"
-	"github.com/utilyre/ex/middlewares"
 	"github.com/utilyre/ex/router"
-	"github.com/utilyre/ex/routes"
 	"github.com/utilyre/xmate"
 )
 
@@ -59,21 +57,7 @@ func New(cfg config.Config) *Application {
 }
 
 func (app *Application) Setup() *Application {
-	app.router.Use(middlewares.NewLogger(app.logger))
-	app.router.Use(middlewares.NewRecoverer())
-
-	home := routes.Home{
-		HomeView: app.views.Lookup("home"),
-	}
-	app.router.HandleFunc("GET /{$}", home.Page)
-
-	public := routes.Public{
-		FileServer: http.FileServer(neuteredFileSystem{
-			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
-		}),
-	}
-	app.router.Handle("/", public)
-
+	app.setupRoutes()
 	return app
 }
 
