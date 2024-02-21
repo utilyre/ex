@@ -28,22 +28,22 @@ func (r *Router) Use(mw Middleware) {
 }
 
 func (r *Router) Handle(pattern string, handler xmate.Handler, middlewares ...Middleware) {
-	for i := len(r.middlewares) - 1; i >= 0; i-- {
-		handler = r.middlewares[i](handler)
-	}
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler)
+	}
+	for i := len(r.middlewares) - 1; i >= 0; i-- {
+		handler = r.middlewares[i](handler)
 	}
 
 	r.serveMux.Handle(pattern, r.handler.Handle(handler))
 }
 
 func (r *Router) HandleFunc(pattern string, handler xmate.HandlerFunc, middlewares ...Middleware) {
-	for i := len(r.middlewares) - 1; i >= 0; i-- {
-		handler = r.middlewares[i](handler).ServeHTTP
-	}
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler).ServeHTTP
+	}
+	for i := len(r.middlewares) - 1; i >= 0; i-- {
+		handler = r.middlewares[i](handler).ServeHTTP
 	}
 
 	r.serveMux.HandleFunc(pattern, r.handler.HandleFunc(handler))
