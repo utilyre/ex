@@ -4,7 +4,6 @@
 /.git
 /.github
 /build
-/.dockerignore
 /.editorconfig
 /.env
 /.gitignore
