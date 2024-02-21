@@ -62,23 +62,17 @@ func (app *Application) Setup() *Application {
 	app.router.Use(middlewares.NewLogger(app.logger))
 	app.router.Use(middlewares.NewRecoverer(app.logger))
 
-	app.router.Group(func(r *router.Router) {
-		home := routes.Home{
-			HomeView: app.views.Lookup("home"),
-		}
+	home := routes.Home{
+		HomeView: app.views.Lookup("home"),
+	}
+	app.router.HandleFunc("GET /{$}", home.Page)
 
-		r.HandleFunc("GET /{$}", home.Page)
-	})
-
-	app.router.Group(func(r *router.Router) {
-		public := routes.Public{
-			FileServer: http.FileServer(neuteredFileSystem{
-				fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
-			}),
-		}
-
-		r.Handle("/", public)
-	})
+	public := routes.Public{
+		FileServer: http.FileServer(neuteredFileSystem{
+			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
+		}),
+	}
+	app.router.Handle("/", public)
 
 	return app
 }
