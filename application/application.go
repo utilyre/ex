@@ -60,7 +60,7 @@ func New(cfg config.Config) *Application {
 
 func (app *Application) Setup() *Application {
 	app.router.Use(middlewares.NewLogger(app.logger))
-	app.router.Use(middlewares.NewRecoverer(app.logger))
+	app.router.Use(middlewares.NewRecoverer())
 
 	home := routes.Home{
 		HomeView: app.views.Lookup("home"),
