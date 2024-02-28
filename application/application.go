@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/schema"
 	"github.com/utilyre/ex/config"
 	"github.com/utilyre/ex/router"
 	"github.com/utilyre/xmate"
@@ -19,6 +20,7 @@ type Application struct {
 	logger   *slog.Logger
 	views    *template.Template
 	router   *router.Router
+	decoder  *schema.Decoder
 	validate *validator.Validate
 }
 
@@ -34,6 +36,7 @@ func New(cfg config.Config) *Application {
 	}
 
 	router := router.New(newErrorHandler(views.Lookup("error")))
+	decoder := schema.NewDecoder()
 	validate := validator.New()
 
 	return &Application{
@@ -41,6 +44,7 @@ func New(cfg config.Config) *Application {
 		logger:   logger,
 		views:    views,
 		router:   router,
+		decoder:  decoder,
 		validate: validate,
 	}
 }
