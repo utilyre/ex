@@ -3,6 +3,7 @@ package middlewares
 import (
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 
 	"github.com/utilyre/ex/router"
@@ -22,6 +23,11 @@ func (w *loggerResponseWriter) WriteHeader(status int) {
 func NewLogger(logger *slog.Logger) router.Middleware {
 	return func(next xmate.Handler) xmate.Handler {
 		return xmate.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+			ip, _, err := net.SplitHostPort(r.RemoteAddr)
+			if err != nil {
+				return err
+			}
+
 			w2 := &loggerResponseWriter{ResponseWriter: w}
 			if err := next.ServeHTTP(w2, r); err != nil {
 				if httpErr := new(xmate.HTTPError); errors.As(err, &httpErr) {
@@ -31,7 +37,7 @@ func NewLogger(logger *slog.Logger) router.Middleware {
 				}
 
 				logger.Warn("failed to run http handler",
-					slog.String("remote", r.RemoteAddr),
+					slog.String("ip", ip),
 					slog.String("method", r.Method),
 					slog.String("path", r.URL.Path),
 					slog.Int("status", w2.status),
@@ -42,7 +48,7 @@ func NewLogger(logger *slog.Logger) router.Middleware {
 			}
 
 			logger.Info("ran http handler",
-				slog.String("remote", r.RemoteAddr),
+				slog.String("ip", ip),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
 				slog.Int("status", w2.status),
