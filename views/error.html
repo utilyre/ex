@@ -2,9 +2,10 @@
 <html lang="en">
   <head>
     {{template "head"}}
+    <title>{{StatusText .Code}}</title>
   </head>
   <body>
-    <h1>{{.Code}}</h1>
+    <h1>{{.Code}} {{StatusText .Code}}</h1>
     <p>{{.Message}}</p>
   </body>
 </html>

@@ -25,7 +25,9 @@ type Application struct {
 func New(cfg config.Config) *Application {
 	logger := newLogger(cfg.Mode, cfg.LogLevel)
 
-	views, err := template.ParseGlob(filepath.Join(cfg.AppRoot, "views", "*.html"))
+	views, err := template.New("views").
+		Funcs(template.FuncMap{"StatusText": http.StatusText}).
+		ParseGlob(filepath.Join(cfg.AppRoot, "views", "*.html"))
 	if err != nil {
 		logger.Error("failed to parse views", "error", err)
 		os.Exit(1)
