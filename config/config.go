@@ -50,8 +50,6 @@ type Config struct {
 	LogLevel   slog.Level `env:"LOG_LEVEL,required"`
 	AppRoot    string     `env:"APP_ROOT,required"`
 	ServerAddr string     `env:"SERVER_ADDR,required"`
-
-	DSN string `env:"DSN,required"`
 }
 
 func Load() (Config, error) {

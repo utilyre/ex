@@ -1,7 +1,6 @@
 package application
 
 import (
-	"database/sql"
 	"errors"
 	"html/template"
 	"log/slog"
@@ -10,9 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/dialect/sqlitedialect"
-	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/utilyre/ex/config"
 	"github.com/utilyre/ex/router"
 	"github.com/utilyre/xmate"
@@ -24,7 +20,6 @@ type Application struct {
 	views    *template.Template
 	router   *router.Router
 	validate *validator.Validate
-	db       *bun.DB
 }
 
 func New(cfg config.Config) *Application {
@@ -39,20 +34,12 @@ func New(cfg config.Config) *Application {
 	router := router.New(newErrorHandler(views.Lookup("error")))
 	validate := validator.New()
 
-	sqldb, err := sql.Open(sqliteshim.ShimName, cfg.DSN)
-	if err != nil {
-		logger.Error("failed to open database connection", "dsn", cfg.DSN, "error", err)
-		os.Exit(1)
-	}
-	db := bun.NewDB(sqldb, sqlitedialect.New())
-
 	return &Application{
 		cfg:      cfg,
 		logger:   logger,
 		views:    views,
 		router:   router,
 		validate: validate,
-		db:       db,
 	}
 }
 
