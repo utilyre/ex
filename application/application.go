@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/schema"
 	"github.com/utilyre/ex/config"
 	"github.com/utilyre/ex/router"
-	"github.com/utilyre/xmate"
+	"github.com/utilyre/xmate/v2"
 )
 
 type Application struct {
@@ -83,7 +83,7 @@ func newLogger(mode config.Mode, level slog.Level) *slog.Logger {
 
 func newErrorHandler(errorView *template.Template) xmate.ErrorHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := r.Context().Value(xmate.ErrorKey{}).(error)
+		err := r.Context().Value(xmate.KeyError).(error)
 
 		httpErr := new(xmate.HTTPError)
 		if !errors.As(err, &httpErr) {

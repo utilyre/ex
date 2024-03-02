@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"github.com/utilyre/xmate"
+	"github.com/utilyre/xmate/v2"
 )
 
-var ErrPageNotFound = xmate.NewHTTPError(http.StatusNotFound, "Page Not Found")
+var ErrPageNotFound = xmate.Errorf(http.StatusNotFound, "Page Not Found")
 
 type notFoundResponseWriter struct {
 	http.ResponseWriter

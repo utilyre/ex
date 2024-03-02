@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/utilyre/xmate"
+	"github.com/utilyre/xmate/v2"
 )
 
 type Home struct {

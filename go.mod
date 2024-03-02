@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.18.0
 	github.com/gorilla/schema v1.2.1
 	github.com/joho/godotenv v1.5.1
-	github.com/utilyre/xmate v1.2.5
+	github.com/utilyre/xmate/v2 v2.0.0
 )
 
 require (

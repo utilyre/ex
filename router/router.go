@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/utilyre/xmate"
+	"github.com/utilyre/xmate/v2"
 )
 
 type serveMux = http.ServeMux

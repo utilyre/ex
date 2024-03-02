@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/utilyre/ex/router"
-	"github.com/utilyre/xmate"
+	"github.com/utilyre/xmate/v2"
 )
 
 func NewRecoverer() router.Middleware {
