@@ -30,7 +30,7 @@ func NewLogger(logger *slog.Logger) router.Middleware {
 
 			w2 := &loggerResponseWriter{ResponseWriter: w}
 			if err := next.ServeHTTP(w2, r); err != nil {
-				if httpErr := new(xmate.HTTPError); errors.As(err, &httpErr) {
+				if httpErr := (xmate.HTTPError{}); errors.As(err, &httpErr) {
 					w2.status = httpErr.Code
 				} else {
 					w2.status = http.StatusInternalServerError

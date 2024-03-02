@@ -85,7 +85,7 @@ func newErrorHandler(errorView *template.Template) xmate.ErrorHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.Context().Value(xmate.KeyError).(error)
 
-		httpErr := new(xmate.HTTPError)
+		var httpErr xmate.HTTPError
 		if !errors.As(err, &httpErr) {
 			httpErr.Code = http.StatusInternalServerError
 			httpErr.Message = "Internal Server Error"
