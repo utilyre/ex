@@ -1,4 +1,4 @@
-package routes
+package controller
 
 import (
 	"net/http"
@@ -30,13 +30,13 @@ func (w *notFoundResponseWriter) Write(p []byte) (int, error) {
 	return w.ResponseWriter.Write(p)
 }
 
-type Public struct {
+type PublicController struct {
 	FileServer http.Handler
 }
 
-func (p Public) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
+func (pc PublicController) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	w2 := &notFoundResponseWriter{ResponseWriter: w}
-	p.FileServer.ServeHTTP(w2, r)
+	pc.FileServer.ServeHTTP(w2, r)
 	if w2.status == http.StatusNotFound {
 		return ErrPageNotFound
 	}
