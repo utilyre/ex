@@ -50,7 +50,7 @@ func New(cfg config.Config) *Application {
 }
 
 func (app *Application) Setup() *Application {
-	app.setupRoutes()
+	app.setupWeb()
 	return app
 }
 

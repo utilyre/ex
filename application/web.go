@@ -8,7 +8,7 @@ import (
 	"github.com/utilyre/ex/middleware"
 )
 
-func (app *Application) setupRoutes() {
+func (app *Application) setupWeb() {
 	app.router.Use(middleware.NewLogger(app.logger))
 	app.router.Use(middleware.NewRecoverer())
 
