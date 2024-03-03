@@ -10,16 +10,6 @@ import (
 	"github.com/utilyre/xmate/v2"
 )
 
-type loggerResponseWriter struct {
-	http.ResponseWriter
-	status int
-}
-
-func (w *loggerResponseWriter) WriteHeader(status int) {
-	w.status = status
-	w.ResponseWriter.WriteHeader(status)
-}
-
 func NewLogger(logger *slog.Logger) router.Middleware {
 	return func(next xmate.Handler) xmate.Handler {
 		return xmate.HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
@@ -57,4 +47,14 @@ func NewLogger(logger *slog.Logger) router.Middleware {
 			return nil
 		})
 	}
+}
+
+type loggerResponseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *loggerResponseWriter) WriteHeader(status int) {
+	w.status = status
+	w.ResponseWriter.WriteHeader(status)
 }
