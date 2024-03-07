@@ -12,15 +12,25 @@ func (app *Application) setupWeb() {
 	app.router.Use(middleware.NewLogger(app.logger))
 	app.router.Use(middleware.NewRecoverer())
 
-	home := controller.HomeController{
+	setupHomeController(app)
+	setupPublicController(app)
+}
+
+func setupHomeController(app *Application) {
+	hc := controller.HomeController{
 		HomeView: app.views.Lookup("home"),
 	}
-	app.router.HandleFunc("GET /{$}", home.Page)
 
-	public := controller.PublicController{
+	app.router.HandleFunc("GET /{$}", hc.Page)
+}
+
+func setupPublicController(app *Application) {
+	pc := controller.PublicController{
 		FileServer: http.FileServer(neuteredFileSystem{
 			fs: http.Dir(filepath.Join(app.cfg.AppRoot, "public")),
 		}),
 	}
-	app.router.Handle("/", public)
+
+	app.router.Handle("/", pc)
+
 }
