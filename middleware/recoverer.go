@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/utilyre/ex/router"
+	"github.com/utilyre/ex/application/router"
 	"github.com/utilyre/xmate/v2"
 )
 
